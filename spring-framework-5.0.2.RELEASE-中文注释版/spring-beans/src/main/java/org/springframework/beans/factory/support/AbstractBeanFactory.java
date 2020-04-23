@@ -205,6 +205,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		//根据指定的名称获取被管理Bean的名称，剥离指定名称中对容器的相关依赖
 		//如果指定的是别名，将别名转换为规范的Bean名称
 		final String beanName = transformedBeanName(name);
+
+		// 注意跟着这个，这个是返回值
 		Object bean;
 
 		// Eagerly check singleton cache for manually registered singletons.
@@ -280,6 +282,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 				// Guarantee initialization of beans that the current bean depends on.
 				//获取当前Bean所有依赖Bean的名称
+				// 注意，这里的依赖指的是 depends-on 中定义的依赖
 				String[] dependsOn = mbd.getDependsOn();
 				//如果当前Bean有依赖Bean
 				if (dependsOn != null) {
