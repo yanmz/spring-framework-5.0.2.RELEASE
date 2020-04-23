@@ -186,6 +186,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		for (Resource resource : resources) {
 			counter += loadBeanDefinitions(resource);
 		}
+		//最后返回 counter，表示总共加载了多少的 BeanDefinition
 		return counter;
 	}
 	//重载方法，调用下面的loadBeanDefinitions(String, Set<Resource>);方法

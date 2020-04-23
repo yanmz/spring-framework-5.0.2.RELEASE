@@ -135,6 +135,8 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		this.delegate = createDelegate(getReaderContext(), root, parent);
 
 		if (this.delegate.isDefaultNamespace(root)) {
+			// 这块说的是根节点 <beans ... profile="dev" /> 中的 profile 是否是当前环境需要的，
+			// 如果当前环境配置的 profile 不包含此 profile，那就直接 return 了，不对此 <beans /> 解析
 			String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
 			if (StringUtils.hasText(profileSpec)) {
 				String[] specifiedProfiles = StringUtils.tokenizeToStringArray(
@@ -188,10 +190,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 					//Bean定义的Document的元素节点使用的是Spring默认的XML命名空间
 					if (delegate.isDefaultNamespace(ele)) {
 						//使用Spring的Bean规则解析元素节点
+						// default namespace 涉及到的就四个标签 <import />、<alias />、<bean /> 和 <beans />，
 						parseDefaultElement(ele, delegate);
 					}
 					else {
 						//没有使用Spring默认的XML命名空间，则使用用户自定义的解//析规则解析元素节点
+						//<mvc />、<task />、<context />、<aop />
 						delegate.parseCustomElement(ele);
 					}
 				}
@@ -209,19 +213,24 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
 		//如果元素节点是<Import>导入元素，进行导入解析
 		if (delegate.nodeNameEquals(ele, IMPORT_ELEMENT)) {
+			// 处理 <import /> 标签
 			importBeanDefinitionResource(ele);
 		}
 		//如果元素节点是<Alias>别名元素，进行别名解析
 		else if (delegate.nodeNameEquals(ele, ALIAS_ELEMENT)) {
+			// 处理 <alias /> 标签定义
+			// <alias name="fromName" alias="toName"/>
 			processAliasRegistration(ele);
 		}
 		//元素节点既不是导入元素，也不是别名元素，即普通的<Bean>元素，
 		//按照Spring的Bean规则解析元素
 		else if (delegate.nodeNameEquals(ele, BEAN_ELEMENT)) {
+			// 处理 <bean /> 标签定义
 			processBeanDefinition(ele, delegate);
 		}
 		else if (delegate.nodeNameEquals(ele, NESTED_BEANS_ELEMENT)) {
 			// recurse
+			// 如果碰到的是嵌套的 <beans /> 标签，需要递归
 			doRegisterBeanDefinitions(ele);
 		}
 	}
@@ -351,6 +360,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 */
 	//解析Bean定义资源Document对象的普通元素
 	protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
+		//将 <bean /> 节点中的信息提取出来，然后封装到一个 BeanDefinitionHolder 中
 		BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
 		// BeanDefinitionHolder是对BeanDefinition的封装，即Bean定义的封装类
 		//对Document对象中<Bean>元素的解析由BeanDefinitionParserDelegate实现
